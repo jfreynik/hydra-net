@@ -1,0 +1,5 @@
+/.c9
+/vendor
+composer.lock
+php.ini
+php_errors.log
