@@ -1,4 +1,0 @@
-<?php
-
-namespace hydra\net;
-
