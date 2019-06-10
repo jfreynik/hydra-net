@@ -147,11 +147,6 @@ interface HttpRequestInterface extends HttpConstants
     */
     public function getData ($name = "");
     
-    /**
-    * 
-    * /
-    public function addData ($name = "", $value = "");
-    */
     
     /**
     * 
@@ -308,4 +303,16 @@ interface HttpRequestInterface extends HttpConstants
     * 
     */
     public function setBodyRaw ($body = "", $needsTransferDecoded = false);
+
+
+    // NEWLY ADDED
+
+    public function setParams ($params = array ());
+
+    public function getParams ();
+
+    public function setParam ($name = "", $data = "");
+
+    public function getParam ($name = "");
+
 }

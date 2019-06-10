@@ -661,13 +661,17 @@ class HttpRequest implements HttpRequestInterface
      * encoding ... only getting the response body should do this.
      * BUT the raw body may need decoded when set - hence the reason for the
      * flag.
+     * 
+     * headers should be set before setting the raw body
+     * 
      */
     public function setBodyRaw ($body = "", $needsTransferDecoded = false)
     {
         $this->options["body"] = $body;
         
+        // the below is not used
         if ($needsTransferDecoded) {
-            $transferEncoding = $this->getTransferEncoder();
+            $transferEncoding = $this->getTransferEncoding();
         }
         
         $contentType = $this->getContentType();
@@ -696,6 +700,27 @@ class HttpRequest implements HttpRequestInterface
         
         return $this;
     }
+
+    public function getParams () 
+    {
+        // TODO implement
+    }
+
+    public function getParam ($name = "")
+    {
+        
+    }
+
+    public function setParams ($params = array())
+    {
+
+    }
+
+    public function setParam ($name = "", $value = "")
+    {
+        
+    }
+
     
     public function __toString ()
     {

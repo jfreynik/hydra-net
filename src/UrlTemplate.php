@@ -11,9 +11,8 @@ class UrlTemplate
     
     protected $template = "";
     
-    public function __construct (
-        $template = ""
-    ) {
+    public function __construct ($template = "") 
+    {
         $this->template = $template;
     }
     
@@ -53,8 +52,8 @@ class UrlTemplate
             $temp = str_replace("//", "/", $temp, $count);
         } while ($count);
         
+        // is this necessary?
         return rtrim($temp, "/");
-        
     }
     
     public function __toString ()

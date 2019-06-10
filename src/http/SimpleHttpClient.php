@@ -16,7 +16,10 @@ class SimpleHttpClient implements SimpleHttpClientInterface
         
         // will most likely need more proxy details...
         "proxy"         => "",
+
         "timeout"       => self::TIMEOUT_DEFAULT,
+
+        // is the buffer even used?
         "buffer"        => self::BUFFER_DEFAULT,
         "maxRedirects"  => self::MAX_REDIRECTS,
     );
@@ -28,6 +31,8 @@ class SimpleHttpClient implements SimpleHttpClientInterface
     protected $links = array ();
     
     protected $images = array ();
+
+    protected $domain = "";
     
     protected $request = null;
     
@@ -70,36 +75,42 @@ class SimpleHttpClient implements SimpleHttpClientInterface
     
     public function getProxy ()
     {
-        
+        return $this->options["proxy"];
     }
     
     public function setProxy ($proxy = "")
     {
-        
+        $this->options["proxy"] = $proxy;
+        return $this;
     }
     
     public function getTimeout ()
     {
-        
+        return $this->options["timeout"];
     }
     
     public function setTimeout ($timeout = "")
     {
-        
+        $this->options["timeout"] = $timeout;
+        return $this;
     }
     
     public function getMaxRedirects ()
     {
-        
+        return $this->options["maxRedirects"];
     }
     
     public function setMaxRedirects ($redirects = "")
     {
-        
+        $this->options["maxRedirects"] = $redirects;
     }
     
     
     // TODO CLEAN UP HERE
+
+    /**
+     * 
+     */
     public function execute (HttpRequest $request)
     {
         // TODO check whether to use cURL / sockets / file_open
@@ -171,6 +182,8 @@ class SimpleHttpClient implements SimpleHttpClientInterface
             throw new HttpClientSocketException(
                 "Unable to write to the socket.");
         }
+
+        // TODO - should we provide ability to use temporary file?
         
         // grab the headers
         $data = array ();
@@ -185,6 +198,8 @@ class SimpleHttpClient implements SimpleHttpClientInterface
         $data = implode ("", $data);
         $rsp->setHeadersRaw ($data);
         
+        // TODO - should we provide ability to use temporary file?
+
         // grab the body of the request
         $data = array ();
         while (!feof ($sock)) {
@@ -209,12 +224,16 @@ class SimpleHttpClient implements SimpleHttpClientInterface
             $code == self::STATUS_CODE_FOUND
         ) {
             $this->redirects++;
+
+            // store in history ... ?
             
             // send get request to the new URL
             $url = $rsp->getHeader("location");
             $request = new HttpRequest(array (
                "url" => $url 
             ));
+
+            // call again ...
             return $this->execute($request);
         } 
         
@@ -240,7 +259,7 @@ class SimpleHttpClient implements SimpleHttpClientInterface
         return self::custom($data);
     }
     
-    public static function get ($data = array ())
+    public static function get ($data = array (), $options = array ())
     {
         if (is_string($data)) {
             $data = array (
@@ -248,50 +267,57 @@ class SimpleHttpClient implements SimpleHttpClientInterface
             );
         }
         $data["method"] = self::METHOD_GET;
-        return self::custom($data);
+        return self::custom($data, $options);
     }
     
-    public static function head ($data = array ())
+    public static function head ($data = array (), $options = array ())
     {
         $data["method"] = self::METHOD_HEAD;
-        return self::custom($data);
+        return self::custom($data, $options);
     }
     
-    public static function options ($data = array ())
+    public static function options ($data = array (), $options = array ())
     {
         $data["method"] = self::METHOD_OPTIONS;
-        return self::custom($data);
+        return self::custom($data, $options);
     }
     
-    public static function patch ($data = array ())
+    public static function patch ($data = array (), $options = array ())
     {
         $data["method"] = self::METHOD_PATCH;
-        return self::custom($data);
+        return self::custom($data, $options);
     }
     
-    public static function post ($data = array ())
+    public static function post ($data = array (), $options = array ())
     {
         $data["method"] = self::METHOD_POST;
-        return self::custom($data);
+        return self::custom($data, $options);
     }
     
-    public static function put ($data = array ())
+    public static function put ($data = array (), $options = array ())
     {
         $data["method"] = self::METHOD_PUT;
-        return self::custom($data);
+        return self::custom($data, $options);
     }
     
-    public static function trace ($data = array ())
+    public static function trace ($data = array (), $options = array ())
     {
         $data["method"] = self::METHOD_TRACE;
-        return self::custom($data);
+        return self::custom($data, $options);
     }
     
-    public static function custom ($data = array ())
-    {
-        $payload = new HttpRequestBuilder($data);
-        $request = new HttpRequest($data);
-        return $request->execute($payload);
+    public static function custom (
+        $request = array (),
+        $options = array ()
+    ) {
+
+        // if request is array - convert to actual request
+        if (is_array ($request)) {
+            $request = new HttpRequest($request);
+        }
+
+        $client = new SimpleHttpClient($options);
+        return $client->execute($request);
     }
     
     public static function raw ($host = "", $raw = "")
@@ -331,6 +357,16 @@ class SimpleHttpClient implements SimpleHttpClientInterface
         );
         
         return $results[1];
+    }
+
+    public function getStyles ()
+    {
+
+    }
+
+    public function getScripts ()
+    {
+
     }
     
     public function getImages ()
